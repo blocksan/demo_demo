@@ -1,0 +1,173 @@
+ <?php
+
+                    if(isset($_GET['category']))
+                    {
+                        $cat=$_GET['category'];
+                        $query="select product_id,product_heading,mrp,selling_price,front_pic from products WHERE sub_category= '$cat' ";
+                    }
+                    else
+                    {
+                        $query="select product_id,product_heading,mrp,selling_price,front_pic from products ";    
+                    }
+                    
+                    $result=mysql_query($query);
+                    $i=0;
+                    $no_pages=2;
+                    $totalresults=mysql_num_rows($result);
+                    $totalpages=ceil($totalresults/$no_pages);
+                    echo "$totalpages";
+                    while($row =mysql_fetch_array($result)&&$i<3)
+                    {
+
+                   echo '  
+                   <div class="swiper-slide" style="margin:10px 35px;" > 
+                                                <div class="paddings-container" >
+                                                    <div class="product-slide-entry">
+                                                        <div class="product-image" style="width:260px">
+                                                            <img src="images/tshirts/normal/normal_'.$row["front_pic"].'" alt="" />
+                                                            <a class="top-line-a right open-product productdetail_load" id="'.$row["product_id"].'"><i class="fa fa-expand"></i> <span>Quick View</span></a>
+                                                            <div class="bottom-line">
+                                                                <div class="right-align">
+                                                                    <a class="bottom-line-a square"><i class="fa fa-heart"></i></a>
+                                                                </div>
+                                                                <div class="left-align">
+                                                                    <a class="bottom-line-a"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <span style="line-height:20px;">'.$row['product_heading'].'</span>
+                                                        <div class="price">
+                                                            <div class="prev">Rs.'.$row["mrp"].'</div>
+                                                            <div class="current">Rs.'.$row["selling_price"].'</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>';
+                        $i++;
+                        }
+
+
+                    ?>
+
+
+
+                    <?php
+                    $i=2;
+                    if(isset($_GET['sort_by_size']))
+                       {
+                        if(isset($_SESSION['category']))
+                            {
+                                unset($_SESSION['category']);
+                            }
+                        if(isset($_SESSION['sort_by_price']))
+                            {
+                                unset($_SESSION['sort_by_price']);
+                            }
+                        if(isset($_GET['from_main_category']))
+                        {
+                             unset($_SESSION['from_main_category']);
+                        }
+                        $_SESSION['sort_by_size']=$_GET['sort_by_size'];
+                       } 
+                    elseif(isset($_GET['category']))
+                    {   if(isset($_SESSION['sort_by_size']))
+                            {
+                                unset($_SESSION['sort_by_size']);
+                            }
+                        if(isset($_SESSION['sort_by_price']))
+                            {
+                                unset($_SESSION['sort_by_price']);
+                            }
+                        if(isset($_GET['from_main_category']))
+                        {
+                             unset($_SESSION['from_main_category']);
+                        }
+                        $_SESSION['category']=$_GET['category'];
+                    }
+                    elseif(isset($_GET['sort_by_price']))
+                    {
+                        if(isset($_SESSION['category']))
+                            {
+                                unset($_SESSION['category']);
+                            }
+                        if(isset($_SESSION['sort_by_size']))
+                            {
+                                unset($_SESSION['sort_by_size']);
+                            }
+                        if(isset($_GET['from_main_category']))
+                        {
+                             unset($_SESSION['from_main_category']);
+                        }
+                        $_SESSION['sort_by_price']=$_GET['sort_by_price'];
+                    }
+                    elseif(isset($_GET['from_main_category']))
+                    {
+                        if(isset($_SESSION['category']))
+                            {   
+                                unset($_SESSION['category']);
+                            }
+                        if(isset($_SESSION['sort_by_size']))
+                            {
+                                unset($_SESSION['sort_by_size']);
+                            }
+                        if(isset($_GET['sort_by_price']))
+                        {
+                             unset($_SESSION['sort_by_price']);
+                        }
+                        $_SESSION['from_main_category']=$_GET['from_main_category'];
+                    }
+                    
+                    ?>
+
+
+
+
+
+                    $('.size-selector .entry').click(function(){
+            $(".dynamicloading .swiper-wrapper").html("");
+           // $(this).addClass('active');
+
+            var id2="";
+            id2=$(this).attr('id');
+            console.log(id2);
+            var track_load = 0;  //total loaded record group(s)
+                       var loading  = false;    //to prevents multipal ajax loads
+                       var total_groups = <?php echo $total_groups=20; ?>; //total record group(s)
+                                    loading = true; //prevent further ajax loading
+                                        $('#loadmore').hide();
+                                      $('.animation_loading_image').show(); //show loading image
+                                    
+                                    //load data from the server using a HTTP POST request
+                                    $.post('loadingproducts.php',{'sort_by_size': id2}, function(data){
+                                                        
+                                        $(".dynamicloading .swiper-wrapper").append(data); //append received data into the element
+
+                                        //hide loading image
+                                        $('#loadmore').show();
+                                        $('.animation_loading_image').hide(); //hide loading image once data is received
+                                        
+                                        track_load++; //loaded group increment
+                                        loading = false; 
+                                    
+                                    }).fail(function(xhr, ajaxOptions, thrownError) { //any errors?
+                                        
+                                        alert(thrownError); //alert with HTTP error
+                                         $(".dynamicloading .swiper-wrapper").append("no more products"); 
+                                        $('.animation_loading_image').hide(); //hide loading image
+                                        loading = false;
+                                    
+                                    });
+});
+
+
+$page_number = filter_var($_POST["page"], FILTER_SANITIZE_NUMBER_INT, FILTER_FLAG_STRIP_HIGH);
+
+
+$onepageresult=8;
+    $page_number = filter_var($_POST["page"], FILTER_SANITIZE_NUMBER_INT, FILTER_FLAG_STRIP_HIGH);
+            if(!is_numeric($page_number))
+            {
+                header('location:error.html');
+                
+            }
+    $position=($page_number * $onepageresult);

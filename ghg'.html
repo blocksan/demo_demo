@@ -1,0 +1,54 @@
+<?php
+include('db_connect.php');
+ $query= "SELECT * from product_info as p1 LEFT JOIN product_category as p2 ON p1.category_id=p2.category_id LEFT JOIN product_images as p3 ON p1.product_id=p3.product_id LEFT JOIN product_cost as p4 ON p2.category_id=p4.category_id WHERE p1.product_id IN (select product_id from user_wishlist WHERE user_id='10001')";
+                                $result=mysql_query($query);
+                               if(mysql_num_rows($result)>0)
+                                {
+                                    while($row=mysql_fetch_array($result))
+                                {
+
+                                $products='   
+<form class="form-item">
+                                <div class="wishlist-entry" disable="disabled">
+                                    <div class="column-1">
+                                        <div class="traditional-cart-entry">
+                                            <a class="image" href="#"><img alt="" src="images/tshirts/normal/'.$row["image_logo"].'" /></a>
+                                            <div class="content">
+                                                <div class="cell-view">
+                                                    <span class="tag" >'.$row['product_heading'].'</span>
+                                                    <span class="title" >'.strtoupper($row['product_name']).'</span>
+                                                    <div class="inline-description">'.$row['sub_category'].'/'.$row['sub_category'].'</div>
+                                                    <div class="inline-description" style="font-weight:bold;color:black">Rs. &nbsp;'.$row['category_price'].'</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column-2">
+                                    <input  name="helo" value="hi" type="hidden"></input>
+                                        <button type="submit">add to cart</button>
+                                        <a class="remove-button removeProduct" id="'.$row["product_id"].'" ><i class="fa fa-times"></i></a>
+                                    </div>
+                                </div></form>';
+                                echo $products;
+                                }
+                                }
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+</body>
+<script src="js/jquery-2.1.3.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.form-item').on("submit",function(){
+			var formdata=$(this).serialize();
+			alert(formdata);
+		});
+		});
+</script>
+</html>
